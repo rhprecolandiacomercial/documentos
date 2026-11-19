@@ -32,7 +32,7 @@
     var soT = /^t=[0-9a-fA-F-]{36}$/.test(q);
     var destino;
     if (!q || view === 'corrigir') destino = 'requisicao.html' + (q ? '?' + q : '');
-    else if (soT) destino = APPS + '?view=docs&' + q;
+    else if (soT) destino = 'docs.html?' + q;
     else destino = APPS + '?' + q;
     location.replace(destino);
     setTimeout(function(){ m.innerHTML = 'Se a página não abrir, <a href="' + destino + '">toque aqui</a>.'; }, 6000);
