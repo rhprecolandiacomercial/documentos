@@ -2,41 +2,30 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <title>Preçolândia — Recursos Humanos</title>
-<style>
-  html, body { margin:0; padding:0; height:100%; background:#FBFAFC; font-family:Arial,Helvetica,sans-serif; }
-  iframe { position:fixed; inset:0; width:100%; height:100%; border:0; background:#FBFAFC; }
-  .aviso { padding:40px 20px; text-align:center; color:#241A33; }
-  .aviso a { color:#4D2885; font-weight:bold; }
-</style>
+<style>body{font-family:Arial,Helvetica,sans-serif;background:#FBFAFC;color:#241A33;text-align:center;padding:48px 20px;}a{color:#4D2885;font-weight:bold;}</style>
 </head>
 <body>
-<div id="msg" class="aviso">Carregando...</div>
+<p id="m">Carregando...</p>
 <script>
-  // Uma casca para todas as páginas do sistema (assim a faixa "criado por um usuário do Google Apps Script" não aparece).
-  //   .../?t=CODIGO                      -> documentos de admissão do candidato
-  //   .../                               -> requisição de vaga (formulário dos gestores)
-  //   .../?view=painel&key=CHAVE         -> Painel de Vagas (RH)
-  //   .../?view=QUALQUER&...             -> repassa os mesmos parâmetros para o sistema
-  var BASE = 'https://script.google.com/macros/s/AKfycbwTbfx5XVEFopj5n2-0KxskVMGy95zL5WTWwSQaGKrCdoLCPHWcHufPa8-afcDUwglv/exec';
-  var msg = document.getElementById('msg');
+  // Roteador: o formulário de requisição fica aqui; os demais links continuam no sistema (Apps Script).
+  var APPS = 'https://script.google.com/macros/s/AKfycbwTbfx5XVEFopj5n2-0KxskVMGy95zL5WTWwSQaGKrCdoLCPHWcHufPa8-afcDUwglv/exec';
   var q = location.search.replace(/^\?/, '');
-  var temView = /(^|&)view=/.test(q);
-  var soT = /^t=[0-9a-fA-F-]{36}$/.exec(q);
-  var url;
+  var m = document.getElementById('m');
   if (q && !/^[A-Za-z0-9_\-.~%=&+]+$/.test(q)) {
-    msg.innerHTML = '<h2>Link inválido</h2><p>Peça um novo link ao RH da Preçolândia.</p>';
+    m.innerHTML = 'Link inválido. Peça um novo link ao RH da Preçolândia.';
   } else {
-    url = BASE + (soT && !temView ? '?view=docs&' + q : (q ? '?' + q : ''));
-    var f = document.createElement('iframe');
-    f.src = url;
-    f.title = 'Preçolândia';
-    f.setAttribute('allow', 'camera; clipboard-write; fullscreen');
-    f.onload = function(){ msg.style.display = 'none'; };
-    document.body.appendChild(f);
-    setTimeout(function(){ if (msg.style.display !== 'none') msg.innerHTML = 'Se a página não abrir, <a href="' + url + '">toque aqui</a>.'; }, 8000);
+    var view = (/(^|&)view=([^&]*)/.exec(q) || [])[2] || '';
+    var soT = /^t=[0-9a-fA-F-]{36}$/.test(q);
+    var destino;
+    if (!q || view === 'corrigir') destino = 'requisicao.html' + (q ? '?' + q : '');
+    else if (soT) destino = APPS + '?view=docs&' + q;
+    else destino = APPS + '?' + q;
+    location.replace(destino);
+    setTimeout(function(){ m.innerHTML = 'Se a página não abrir, <a href="' + destino + '">toque aqui</a>.'; }, 6000);
   }
 </script>
 </body>

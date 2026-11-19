@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="referrer" content="no-referrer">
+<script>
+// Faz o google.script.run funcionar nesta página hospedada no GitHub: cada chamada vai por POST ao servidor (Apps Script).
+(function(){
+  var BASE = 'https://script.google.com/macros/s/AKfycbwTbfx5XVEFopj5n2-0KxskVMGy95zL5WTWwSQaGKrCdoLCPHWcHufPa8-afcDUwglv/exec';
+  function chamar(fn, args, h){
+    fetch(BASE, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }), redirect: 'follow' })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if (j && j.ok) { if (h.s) h.s(j.r, h.u); } else if (h.f) h.f({ message: (j && j.e) || 'Erro no servidor.' }, h.u); })
+      ['catch'](function(){ if (h.f) h.f({ message: 'Sem conexão com o servidor. Verifique a internet e tente de novo.' }, h.u); });
+  }
+  function runner(h){
+    return new Proxy({}, { get: function(_, nome){
+      if (nome === 'withSuccessHandler') return function(f){ return runner({ s: f, f: h.f, u: h.u }); };
+      if (nome === 'withFailureHandler') return function(f){ return runner({ s: h.s, f: f, u: h.u }); };
+      if (nome === 'withUserObject') return function(o){ return runner({ s: h.s, f: h.f, u: o }); };
+      if (typeof nome !== 'string') return undefined;
+      return function(){ chamar(nome, Array.prototype.slice.call(arguments), h); };
+    } });
+  }
+  window.google = { script: { run: runner({}) } };
+})();
+</script>
+<base target="_top">
+<meta charset="utf-8" />
+<style>
+  :root{
+    --bg:#FBFAFC; --surface:#FFFFFF; --surface-2:#F4F1F9;
+    --ink:#241A33; --ink-muted:#6E6379; --border:#E4DEEC;
+    --accent:#4D2885; --accent-ink:#FFFFFF; --accent-soft:#EFE9F7;
+    --success:#1E7F4F; --success-soft:#E3F3EA;
+    --warning:#A15C00; --warning-soft:#FBEEDD;
+    --critical:#B23A2E; --critical-soft:#FBEAE7;
+    --focus:#8A5CD6;
+    --shadow:0 1px 2px rgba(36,26,51,.06), 0 8px 24px -12px rgba(36,26,51,.18);
+  }
+  *{box-sizing:border-box;}
+  /* Tudo em Arial, inclusive botões, campos e títulos das outras páginas */
+  *, input, select, textarea, button{ font-family:Arial,Helvetica,sans-serif !important; }
+  html,body{margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3{ font-family:Arial,Helvetica,sans-serif; font-weight:600; margin:0; }
+
+  .topbar{ display:flex; align-items:center; gap:14px; padding:16px 24px; background:var(--surface); border-bottom:1px solid var(--border); }
+  .brand-logo{ height:44px; width:auto; border-radius:8px; flex:none; display:block; }
+  .topbar h1{ font-size:19px; }
+  .topbar p{ margin:2px 0 0; font-size:12.5px; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.06em; font-weight:600; }
+
+  .wrap{ max-width:820px; margin:0 auto; padding:20px 16px 80px; }
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; box-shadow:var(--shadow); margin-bottom:20px; }
+  @media (max-width:560px){ .panel{ padding:18px; } }
+  .panel h2{ font-size:20px; }
+  .sub{ margin:4px 0 20px; color:var(--ink-muted); font-size:13px; }
+
+  fieldset{ border:none; margin:0 0 22px; padding:0; }
+  legend{ font-family:Arial,Helvetica,sans-serif; font-weight:600; font-size:15.5px; padding:0 0 8px; margin-bottom:12px; border-bottom:1px solid var(--border); width:100%; }
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:560px){ .field-row{ grid-template-columns:1fr; } }
+  label{ font-size:12.5px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.04em; }
+  .req{ color:var(--critical); }
+  input[type=text], input[type=email], input[type=tel], input[type=date], input[type=number], select, textarea{
+    font:inherit; font-size:14.5px; color:var(--ink); background:var(--surface-2);
+    border:1px solid var(--border); border-radius:9px; padding:10px 12px; width:100%;
+  }
+  textarea{ min-height:70px; resize:vertical; }
+  select{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E6379'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:30px; }
+  input:focus, select:focus, textarea:focus{ outline:2px solid var(--focus); outline-offset:1px; }
+  .hidden{ display:none !important; }
+
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{ all:unset; cursor:pointer; padding:9px 16px; border-radius:9px; text-align:center; flex:1; min-width:110px; font-size:13.5px; font-weight:600; color:var(--ink-muted); background:var(--surface-2); border:1px solid var(--border); }
+  .chip:hover{ border-color:var(--accent); }
+  .chip.selected{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+
+  .btn{ all:unset; cursor:pointer; font-weight:600; font-size:14px; padding:11px 20px; border-radius:10px; text-align:center; background:var(--accent); color:var(--accent-ink); }
+  .btn:hover{ filter:brightness(1.06); }
+  .btn[disabled]{ opacity:.6; cursor:default; }
+  .btn.sec{ background:var(--surface); color:var(--accent); border:1px solid var(--border); }
+  .btn.danger{ background:var(--critical); }
+  .btn.ok{ background:var(--success); }
+  .actions{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:6px; }
+
+  .msg{ font-size:13px; font-weight:600; margin-top:10px; }
+  .msg.erro{ color:var(--critical); }
+  .msg.ok{ color:var(--success); }
+
+  .badge{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:5px 9px; border-radius:999px; white-space:nowrap; background:var(--accent-soft); color:var(--accent); flex:none; }
+  .badge.warn{ background:var(--warning-soft); color:var(--warning); }
+  .badge.good{ background:var(--success-soft); color:var(--success); }
+  .badge.bad{ background:var(--critical-soft); color:var(--critical); }
+
+  dl.grid{ display:grid; grid-template-columns:1fr 1fr; gap:2px 16px; margin:12px 0; font-size:13.5px; }
+  @media (max-width:560px){ dl.grid{ grid-template-columns:1fr; } }
+  dl.grid dt{ color:var(--ink-muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em; margin-top:8px; }
+  dl.grid dd{ margin:1px 0 0; white-space:pre-wrap; }
+  dl.grid .full{ grid-column:1 / -1; }
+</style>
+
+</head>
+<body>
+<header class="topbar">
+  <img class="brand-logo" src="data:image/jpeg;base64,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" alt="Preçolândia" />
+
+  <div><h1>Requisição de Vaga</h1><p>Recursos Humanos · Preçolândia</p></div>
+</header>
+
+<div class="wrap">
+  <div class="chips" id="modo" style="margin-bottom:16px;">
+    <button type="button" class="chip selected" data-modo="requisicao">Nova requisição</button>
+    <button type="button" class="chip" data-modo="docs">Enviar documentos de candidato</button>
+    <button type="button" class="chip" data-modo="curriculo">Banco de currículos</button>
+  </div>
+
+  <!-- Flyer padrão de divulgação (aparece quando o RH define o arquivo) -->
+  <div class="panel hidden" id="flyer-box" style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div><strong>Flyer de divulgação de vagas</strong><div style="font-size:12.5px;color:var(--ink-muted);">Imprima e deixe no mural ou no caixa da loja.</div></div>
+    <div class="actions" style="margin:0;"><a class="btn" id="flyer-baixar" target="_blank" rel="noopener">Baixar para imprimir</a><a class="btn sec" id="flyer-ver" target="_blank" rel="noopener">Ver</a></div>
+  </div>
+
+  <style>
+  .contatos-rh{ padding:14px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; background:var(--accent-soft, #EFE9F7); border:1px solid var(--border); }
+  .contatos-titulo{ font-weight:700; color:var(--accent, #4D2885); font-size:14px; min-width:150px; }
+  .contatos-lista{ display:flex; gap:28px; flex-wrap:wrap; flex:1; }
+  .contato{ display:flex; flex-direction:column; gap:2px; font-size:13px; }
+  .contato strong{ font-size:13.5px; color:var(--ink); }
+  .contato span{ color:var(--ink-muted); }
+  .contato a{ color:#1f8f4e; text-decoration:none; font-weight:600; }
+  .contato a:hover{ text-decoration:underline; }
+  </style>
+  <!-- Contatos do RH -->
+  <div class="panel contatos-rh">
+    <div class="contatos-titulo">Dúvidas? Fale com o RH</div>
+    <div class="contatos-lista">
+      <div class="contato"><strong>Victória Maia</strong>
+        <span>victoria.maia@precolandia.com.br</span>
+        <a href="https://wa.me/5511972789331" target="_blank" rel="noopener" title="Abrir no WhatsApp">(11) 97278-9331</a></div>
+      <div class="contato"><strong>RH · Geovanna e Esther</strong>
+        <span>rh@precolandia.com.br</span>
+        <span><a href="https://wa.me/5511972405339" target="_blank" rel="noopener" title="Abrir no WhatsApp">(11) 97240-5339</a> · <a href="https://wa.me/5511953056331" target="_blank" rel="noopener" title="Abrir no WhatsApp">(11) 95305-6331</a></span></div>
+    </div>
+  </div>
+
+  <!-- Banco de currículos: o gestor envia os currículos entregues na loja -->
+  <section class="panel hidden" id="cv-panel">
+    <h2>Banco de currículos</h2>
+    <p class="sub">Recebeu um currículo na loja? Envie aqui. O RH guarda no banco de currículos para as próximas vagas.</p>
+    <div class="field-row">
+      <div class="field"><label for="cv-por">Seu e-mail <span class="req">*</span></label><input type="email" id="cv-por" placeholder="Se for loja, o e-mail da unidade"></div>
+      <div class="field"><label for="cv-loja">Loja / setor <span class="req">*</span></label><select id="cv-loja"></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="cv-nome">Nome do candidato <span class="req">*</span></label><input type="text" id="cv-nome"></div>
+      <div class="field"><label for="cv-tel">Telefone do candidato <span class="req">*</span></label><input type="text" id="cv-tel" placeholder="(11) 90000-0000"></div>
+    </div>
+    <div class="field"><label for="cv-email">E-mail do candidato (opcional)</label><input type="email" id="cv-email"></div>
+    <div class="field"><label for="cv-arq">Currículo <span class="req">*</span></label><input type="file" id="cv-arq" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"><span style="font-size:12px;color:var(--ink-muted);">PDF, foto ou Word · até 3 arquivos · até 10 MB cada. Pode ser foto do currículo em papel.</span></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;color:var(--ink);margin:4px 0 12px;">
+      <input type="checkbox" id="cv-ok" style="margin-top:3px;"> <span>O candidato autorizou o envio do currículo para o banco de currículos da Preçolândia, para participar de processos seletivos. <span class="req">*</span></span>
+    </label>
+    <div class="actions"><button type="button" class="btn" id="cv-enviar">Enviar currículo</button></div>
+    <div class="msg" id="cv-msg"></div>
+    <div id="cv-enviados" class="hidden" style="margin-top:20px;">
+      <h3 style="font-size:15px;margin:0 0 4px;">Currículos que você já enviou</h3>
+      <p class="sub" style="margin:0 0 10px;">A situação é atualizada pelo RH.</p>
+      <div id="cv-lista"></div>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="docs-panel">
+    <h2>Enviar documentos de candidato</h2>
+    <p class="sub">Para uma requisição que você já fez. Informe o e-mail usado na requisição e escolha a vaga.</p>
+    <div class="field"><label for="d-email">Seu e-mail <span class="req">*</span></label><input type="email" id="d-email" placeholder="O mesmo e-mail usado na requisição"><span style="font-size:12px;color:var(--ink-muted);">Assim que você digitar o e-mail, as suas vagas aparecem abaixo.</span></div>
+    <div class="actions" style="margin:-6px 0 16px;"><button type="button" class="btn sec" id="d-buscar">Buscar de novo</button></div>
+    <div id="d-resto" class="hidden">
+      <div class="field"><label for="d-req">Requisição <span class="req">*</span></label><select id="d-req"></select></div>
+      <div class="field"><label for="d-candidato">Nome do candidato <span class="req">*</span></label><input type="text" id="d-candidato"></div>
+      <div id="d-campos"></div>
+      <span style="font-size:12px;color:var(--ink-muted);">Os campos com * são obrigatórios. PDF, foto, Word ou Excel · até 10 MB por arquivo · pode escolher vários arquivos em cada campo.</span>
+      <div class="actions" style="margin-top:14px;"><button type="button" class="btn" id="d-enviar">Enviar documentos</button></div>
+    </div>
+    <div class="msg" id="d-msg"></div>
+  </section>
+
+  <section class="panel" id="form-panel">
+    <h2 id="form-titulo">Nova requisição</h2>
+    <p class="sub" id="form-sub">Preencha uma requisição por cargo. O RH recebe automaticamente e você é avisado por e-mail a cada etapa da vaga.</p>
+    <div class="msg erro hidden" id="corr-aviso" style="margin-bottom:14px;"></div>
+
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>Responsável pela requisição</legend>
+        <div class="field-row">
+          <div class="field"><label for="f-gestor">Nome <span class="req">*</span></label><input type="text" id="f-gestor"></div>
+          <div class="field"><label for="f-email">E-mail <span class="req">*</span></label><input type="email" id="f-email" placeholder="nome@precolandia.com.br"><span style="font-size:12px;color:var(--ink-muted);">Se for loja, informe o e-mail da unidade.</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="f-loja">Loja / setor <span class="req">*</span></label><select id="f-loja"></select></div>
+          <div class="field"><label for="f-whats">WhatsApp Corporativo (opcional)</label><input type="tel" id="f-whats" inputmode="tel" placeholder="(11) 91234-5678"><span style="font-size:12px;color:var(--ink-muted);">Para o RH também avisar você pelo WhatsApp.</span></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>A vaga</legend>
+        <div class="field-row">
+          <div class="field"><label for="f-cargo">Cargo <span class="req">*</span></label><select id="f-cargo"></select></div>
+          <div class="field"><label for="f-qtd">Quantidade de vagas <span class="req">*</span></label><input type="number" id="f-qtd" min="1" step="1" value="1"></div>
+        </div>
+
+        <div class="field">
+          <label>Motivo da vaga <span class="req">*</span></label>
+          <div class="chips" id="motivo">
+            <button type="button" class="chip" data-value="Substituição">Substituição</button>
+            <button type="button" class="chip" data-value="Aumento de quadro">Aumento de quadro</button>
+            <button type="button" class="chip" data-value="Reposição">Reposição</button>
+          </div>
+        </div>
+        <div class="field hidden" id="substitui-wrap"><label for="f-substitui">Nome de quem saiu / será substituído <span class="req">*</span></label><input type="text" id="f-substitui"></div>
+
+        <div class="field"><label for="f-horario">Horário <span class="req">*</span></label><select id="f-horario"></select></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Perfil</legend>
+        <div class="field"><label for="f-req">Requisitos e perfil desejado</label><textarea id="f-req" placeholder="Experiência, escolaridade, habilidades, comportamento esperado..."></textarea></div>
+        <div class="field"><label for="f-obs">Observações</label><textarea id="f-obs"></textarea></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Documentos do candidato (opcional)</legend>
+        <p class="sub" style="margin-top:-4px;">Se já tiver um candidato, anexe aqui os documentos dele. Se anexar, os campos com * são obrigatórios. Também dá para enviar depois, por este mesmo link, na opção "Enviar documentos de candidato" no topo da página.</p>
+        <div class="field"><label for="f-doc-candidato">Nome do candidato</label><input type="text" id="f-doc-candidato"></div>
+        <div id="campos-docs"></div>
+        <span style="font-size:12px;color:var(--ink-muted);">PDF, foto, Word ou Excel · até 10 MB por arquivo · pode escolher vários arquivos em cada campo.</span>
+      </fieldset>
+
+      <div class="actions"><button type="submit" class="btn" id="enviar">Enviar requisição</button></div>
+      <div class="msg erro" id="erro"></div>
+    </form>
+  </section>
+
+  <section class="panel hidden" id="ok-panel">
+    <h2>Requisição enviada ✓</h2>
+    <p class="sub" id="ok-texto"></p>
+    <p class="msg erro hidden" id="ok-erro-docs">Não foi possível anexar os documentos. Envie de novo pela opção "Enviar documentos de candidato", no topo desta página.</p>
+    <p class="sub">Quando tiver documentos de candidatos para esta vaga, volte a este mesmo link e escolha <strong>"Enviar documentos de candidato"</strong>, no topo da página.</p>
+    <div class="actions">
+      <button type="button" class="btn sec" id="nova">Fazer outra requisição</button>
+    </div>
+  </section>
+</div>
+
+<script>
+  window.onerror = function(m){ var e = document.getElementById('erro'); if (e) e.textContent = 'Erro na página: ' + m; };
+  var CORRIGIR = (function(){ var q = new URLSearchParams(location.search); return q.get('view') === 'corrigir' ? { id: q.get('id') || '', t: q.get('t') || '' } : null; })();   // {id, t} quando o gestor abre o link de correção do e-mail
+
+  var LOJAS = ["Loja 01","Loja 02","Loja 03","Loja 04","Loja 05","Loja 06","Loja 07","Loja 08","Loja 09","Loja 10","Loja 11","Loja 12","Loja 13","Loja 14","Loja 15","Loja 16","Loja 17","Loja 18","Loja 19","Loja 20","Loja 23","Loja 24","Loja 29","Loja 30","Loja 32","Loja 33","Loja 34","Loja 35","Loja 36","Loja 37","Loja 38","Loja 39","Loja 40","Loja 41","Loja 42","Loja 43","Loja 44","Loja 45","Loja 46","Loja 48","Loja 49","Loja 50","Loja 52","Compras","Contabilidade","Financeiro","Fiscal","Inventário","Logística","Logística/Água Rasa","Engenharia","Marketing","Marketplace","Quebras","RH","SAC","Regional","TI","Monitoramento","Trainee"];
+  var CARGOS = ["Analista Contábil","Analista De Depto Pessoal","Analista De E-Commerce","Analista De Marketing","Analista De Marketplace","Analista De Marketplace Pleno","Analista De Mídia","Analista De Recursos Humanos","Analista Financeiro","Analista Fiscal","Aprendiz-Assist Administrativo","Arquiteto","Assistente Contábil","Assistente De Compras","Assistente Fiscal","Assistente De Manutenção","Auxiliar Administrativo","Auxiliar De Compras","Auxiliar De Estoque","Auxiliar De Estoque - Quebras","Auxiliar De Estoque/Distribuição","Auxiliar De Estoque/Manuseio","Auxiliar De Estoque/Separação","Auxiliar De Estoque/Solução","Auxiliar De Estoque Pleno/Distribuição","Auxiliar De Estoque Pleno/Manuseio","Auxiliar De Estoque Pleno/Separação","Auxiliar De Estoque Pleno/Solução","Auxiliar De Inventário","Auxiliar De Limpeza","Auxiliar De Loja Geral","Auxiliar De Loja/Estoque","Auxiliar De Loja/Fiscal","Auxiliar De Loja/Reposição","Auxiliar De Manutenção","Auxiliar De Monitoramento","Auxiliar De Recursos Humanos","Auxiliar De Relacionamento","Auxiliar De T.I","Backoffice","Chefe De Cozinha","Contador(A) Sênior","Coordenador De Arte","Coordenador Financeiro","Coordenador(A) De Rh","Coordenador(A) Depto Pessoal","Coordenadora Fiscal","Encarregado De Estoque Pleno","Fiscal De Loja","Ger Geral Estratégia De Preços","Gerente De Atendimento","Gerente De Compras","Gerente De Distribuição","Gerente de Estratégia De Preços","Gerente De Infraestrutura","Gerente De Logística Master","Gerente De Loja","Gerente De Loja Master","Gerente De Loja Pleno","Gerente De Loja Sênior","Gerente De Marketing","Gerente De Monitoramento","Gerente De Operações","Gerente De Recursos Humanos","Gerente De Relacionamento","Gerente De Ti Junior","Gerente De Ti Pleno","Gerente Depto. Pessoal","Gerente E-Commerce/Marketplace","Gerente Financeiro","Gerente Fiscal","Gerente Inventario Sênior","Gerente Regional","Gerente Regional Pleno","Jovem Aprendiz - Assist. Administrativo","Jovem Aprendiz/Auxiliar De Estoque","Líder Administrativo De Distribuição","Líder Administrativo De Logística","Líder De Distribuição","Líder De Logística","Líder De Loja","Líder De Manuseio","Líder De Manuseio De Pedidos","Líder De Monitoramento","Líder De Montagem De Loja","Líder De Patrimônio","Líder De Reparos","Motorista","Motorista De Diretoria","Motorista De Malote","Operador Audiovisual","Operadora De Pdv","Recepcionista"];
+
+  function $(id){ return document.getElementById(id); }
+  function opcoes(sel, lista, extra){
+    sel.innerHTML = '<option value="">Selecione</option>' + lista.map(function(v){ return '<option>' + v + '</option>'; }).join('') + (extra || '');
+  }
+  var HORARIOS = ["08h às 16h20","08h às 17h30","08h30 às 18h","09h às 17h20","09h às 17h35","09h às 18h10","09h às 18h30","09h às 18h40","09h30 às 17h50","10h às 18h20","11h às 19h20","11h40 às 20h","11h50 às 20h10","12h às 20h20","13h45 às 22h05","13h50 às 22h10","Gerencial"];
+  opcoes($('f-loja'), LOJAS);
+  opcoes($('f-horario'), HORARIOS);
+  opcoes($('f-cargo'), CARGOS, '');
+  opcoes($('cv-loja'), LOJAS);
+
+  $('f-cargo').addEventListener('change', function(){
+
+  });
+
+  var motivo = '';
+  $('motivo').addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if (!b) return;
+    motivo = b.dataset.value;
+    Array.prototype.forEach.call(this.querySelectorAll('.chip'), function(c){ c.classList.toggle('selected', c === b); });
+    $('substitui-wrap').classList.toggle('hidden', !pedeNome());
+  });
+
+  function pedeNome(){ return motivo === 'Substituição' || motivo === 'Reposição'; }
+
+  $('form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var cargo = $('f-cargo').value;
+    var d = {
+      gestor: $('f-gestor').value.trim(), email: $('f-email').value.trim(), loja: $('f-loja').value, whatsapp: $('f-whats').value.trim(),
+      cargo: cargo, quantidade: $('f-qtd').value, motivo: motivo, substitui: $('f-substitui').value.trim(),
+      horario: $('f-horario').value.trim(), requisitos: $('f-req').value.trim(), observacoes: $('f-obs').value.trim()
+    };
+    var falta = !d.gestor || !d.email || !d.loja || !d.cargo || !(parseInt(d.quantidade, 10) > 0) || !d.motivo || !d.horario || (pedeNome() && !d.substitui);
+    if (falta) { $('erro').textContent = 'Preencha os campos obrigatórios marcados com *.'; return; }
+    var digWhats = d.whatsapp.replace(/\D/g, '');
+    if (digWhats && [10, 11, 12, 13].indexOf(digWhats.length) < 0) { $('erro').textContent = 'Confira o WhatsApp Corporativo: DDD + número, ex.: (11) 91234-5678. Ou deixe em branco.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { $('erro').textContent = 'Confira o seu e-mail — é por ele que você recebe as atualizações da vaga.'; return; }
+
+    // Documentos opcionais: se anexar algum, precisa anexar todos os obrigatórios.
+    if (CORRIGIR) {   // correção: atualiza a mesma requisição (sem documentos)
+      $('erro').textContent = ''; $('enviar').disabled = true; $('enviar').textContent = 'Enviando correção...';
+      google.script.run
+        .withSuccessHandler(function(r){
+          $('enviar').disabled = false; $('enviar').textContent = 'Enviar correção';
+          $('ok-texto').textContent = 'Requisição #' + r.id + ' corrigida e devolvida ao RH. Você vai receber um e-mail de confirmação em ' + d.email + '.';
+          $('ok-erro-docs').classList.add('hidden'); $('nova').classList.add('hidden');
+          $('form-panel').classList.add('hidden'); $('ok-panel').classList.remove('hidden');
+          window.scrollTo(0, 0);
+        })
+        .withFailureHandler(function(err){
+          $('enviar').disabled = false; $('enviar').textContent = 'Enviar correção';
+          $('erro').textContent = 'Não foi possível enviar a correção (' + (err && err.message ? err.message : 'erro desconhecido') + ').';
+        })
+        .corrigirRequisicao(CORRIGIR.id, CORRIGIR.t, d);
+      return;
+    }
+    var c = conferirDocs($('campos-docs'));
+    if (c.files.length && !$('f-doc-candidato').value.trim()) { $('erro').textContent = 'Informe o nome do candidato dos documentos anexados.'; return; }
+    if (c.files.length && c.erro) { $('erro').textContent = c.erro; return; }
+    var files = c.files;
+
+    $('erro').textContent = '';
+    $('enviar').disabled = true;
+    $('enviar').textContent = files.length ? 'Enviando requisição e documentos...' : 'Enviando...';
+
+    Promise.all(files.map(lerArquivo)).then(function(arquivos){
+      if (arquivos.length) d.anexos = { candidato: $('f-doc-candidato').value.trim(), grupos: agrupar(c.tipos, arquivos) };
+      google.script.run
+        .withSuccessHandler(function(r){
+          $('enviar').disabled = false; $('enviar').textContent = 'Enviar requisição';
+          $('ok-texto').textContent = 'Número da requisição: #' + r.id + '. Você vai receber um e-mail de confirmação em ' + d.email + ' e outro a cada mudança de etapa.' +
+            (arquivos.length && !r.erroDocs ? ' Documentos anexados: ' + arquivos.length + '.' : '');
+          $('ok-erro-docs').classList.toggle('hidden', !r.erroDocs);
+          $('form-panel').classList.add('hidden'); $('ok-panel').classList.remove('hidden');
+          window.scrollTo(0, 0);
+        })
+        .withFailureHandler(function(err){
+          $('enviar').disabled = false; $('enviar').textContent = 'Enviar requisição';
+          $('erro').textContent = 'Não foi possível enviar (' + (err && err.message ? err.message : 'erro desconhecido') + '). Tente novamente.';
+        })
+        .registrarRequisicao(d);
+    })['catch'](function(err){
+      $('enviar').disabled = false; $('enviar').textContent = 'Enviar requisição';
+      $('erro').textContent = err.message;
+    });
+  });
+
+  var MAX_MB = 10;
+  function lerArquivo(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve({ nome: file.name, mimeType: file.type || 'application/octet-stream', data: String(reader.result).split(',')[1] }); };
+      reader.onerror = function(){ reject(new Error('Não consegui ler o arquivo ' + file.name)); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Um campo de arquivo para cada tipo de documento.
+  function montarCamposDocs(el, tipos, obrig){
+    el.innerHTML = tipos.map(function(t){
+      return '<div class="field"><label>' + t + (obrig.indexOf(t) >= 0 ? ' <span class="req">*</span>' : ' (opcional)') + '</label>' +
+        '<input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" class="doc-arq" data-tipo="' + t + '" data-obrig="' + (obrig.indexOf(t) >= 0 ? '1' : '') + '"></div>';
+    }).join('');
+  }
+
+  // Confere os campos e devolve { tipos, files } e, se algo estiver errado, também { erro }.
+  function conferirDocs(el){
+    var tipos = [], files = [], faltam = [];
+    Array.prototype.forEach.call(el.querySelectorAll('.doc-arq'), function(inp){
+      var fs = Array.prototype.slice.call(inp.files || []);
+      if (inp.dataset.obrig && !fs.length) faltam.push(inp.dataset.tipo);
+      fs.forEach(function(f){ tipos.push(inp.dataset.tipo); files.push(f); });
+    });
+    var r = { tipos: tipos, files: files };
+    var grande = files.filter(function(f){ return f.size > MAX_MB * 1024 * 1024; })[0];
+    if (faltam.length) r.erro = 'Anexe também: ' + faltam.join(', ') + '.';
+    else if (files.length > 20) r.erro = 'Anexe no máximo 20 arquivos por vez.';
+    else if (grande) r.erro = 'O arquivo "' + grande.name + '" passa de ' + MAX_MB + ' MB.';
+    return r;
+  }
+
+  function agrupar(tipos, arquivos){
+    var grupos = {};
+    arquivos.forEach(function(a, i){ (grupos[tipos[i]] = grupos[tipos[i]] || []).push(a); });
+    return grupos;
+  }
+
+  var TIPOS_PADRAO = ['Ficha de solicitação de emprego','Currículo','Aprovação','Testes','Outros documentos'];
+  google.script.run
+    .withSuccessHandler(function(r){
+      MAX_MB = r.maxMb;
+      montarCamposDocs($('campos-docs'), r.tipos, r.obrigatorios);
+      montarCamposDocs($('d-campos'), r.tipos, r.obrigatorios);
+    })
+    .withFailureHandler(function(){
+      montarCamposDocs($('campos-docs'), TIPOS_PADRAO, TIPOS_PADRAO.slice(0, 3));
+      montarCamposDocs($('d-campos'), TIPOS_PADRAO, TIPOS_PADRAO.slice(0, 3));
+    })
+    .getTiposDocumento();
+
+  // ---------- Escolha no topo: Nova requisição / Enviar documentos ----------
+  function mostrarModo(modo){
+    Array.prototype.forEach.call(document.querySelectorAll('#modo .chip'), function(c){ c.classList.toggle('selected', c.dataset.modo === modo); });
+    $('docs-panel').classList.toggle('hidden', modo !== 'docs');
+    $('cv-panel').classList.toggle('hidden', modo !== 'curriculo');
+    $('form-panel').classList.toggle('hidden', modo !== 'requisicao');
+    $('ok-panel').classList.add('hidden');
+  }
+  $('modo').addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if (b) mostrarModo(b.dataset.modo);
+  });
+
+  // ---------- Banco de currículos ----------
+  function cvMsg(texto, ok){ $('cv-msg').className = 'msg ' + (ok ? 'ok' : 'erro'); $('cv-msg').textContent = texto; }
+  $('cv-enviar').addEventListener('click', function(){
+    var d = { enviadoPor: $('cv-por').value.trim(), loja: $('cv-loja').value, nome: $('cv-nome').value.trim(),
+              telefone: $('cv-tel').value.trim(), email: $('cv-email').value.trim(), consentimento: $('cv-ok').checked };
+    var files = Array.prototype.slice.call($('cv-arq').files || []);
+    if (!d.enviadoPor || !d.loja || !d.nome || !d.telefone) { cvMsg('Preencha os campos obrigatórios marcados com *.', false); return; }
+    if (!files.length) { cvMsg('Anexe o currículo.', false); return; }
+    if (files.length > 3) { cvMsg('Anexe no máximo 3 arquivos.', false); return; }
+    var grande = files.filter(function(f){ return f.size > MAX_MB * 1024 * 1024; })[0];
+    if (grande) { cvMsg('O arquivo "' + grande.name + '" passa de ' + MAX_MB + ' MB.', false); return; }
+    if (!d.consentimento) { cvMsg('Confirme que o candidato autorizou o envio do currículo.', false); return; }
+    var btn = this; btn.disabled = true; btn.textContent = 'Enviando...'; cvMsg('', true);
+    Promise.all(files.map(lerArquivo)).then(function(arquivos){
+      google.script.run
+        .withSuccessHandler(function(){
+          btn.disabled = false; btn.textContent = 'Enviar currículo';
+          ['cv-nome', 'cv-tel', 'cv-email'].forEach(function(id){ $(id).value = ''; });
+          $('cv-arq').value = ''; $('cv-ok').checked = false;
+          cvMsg('Currículo enviado ✓ Obrigado! Se tiver outro, pode enviar agora.', true);
+          cvUltimaBusca = ''; buscarCurriculos();
+        })
+        .withFailureHandler(function(err){ btn.disabled = false; btn.textContent = 'Enviar currículo'; cvMsg('Não foi possível enviar: ' + (err && err.message), false); })
+        .enviarCurriculo(d, arquivos);
+    })['catch'](function(err){ btn.disabled = false; btn.textContent = 'Enviar currículo'; cvMsg(err.message, false); });
+  });
+
+  // Lista do que o gestor já enviou: aparece sozinha assim que ele digita o e-mail.
+  var cvUltimaBusca = '', cvTimer = null;
+  function escCv(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(ch){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]; }); }
+  function corSituacao(s){ var k = String(s || '').toLowerCase(); return k.indexOf('contrat') === 0 ? 'good' : (k.indexOf('descart') === 0 ? 'bad' : (k.indexOf('em processo') === 0 ? 'warn' : '')); }
+  function buscarCurriculos(){
+    var email = $('cv-por').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email === cvUltimaBusca) return;
+    cvUltimaBusca = email;
+    google.script.run
+      .withSuccessHandler(function(lista){
+        if (email !== $('cv-por').value.trim().toLowerCase()) return;
+        $('cv-enviados').classList.remove('hidden');
+        $('cv-lista').innerHTML = !lista.length ? '<p class="sub" style="margin:0;">Nenhum currículo enviado com este e-mail ainda.</p>' :
+          '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;"><thead><tr>' +
+          ['Enviado em', 'Loja', 'Candidato', 'Situação'].map(function(h){ return '<th style="text-align:left;font-size:11.5px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em;padding:8px 6px;border-bottom:1px solid var(--border);">' + h + '</th>'; }).join('') +
+          '</tr></thead><tbody>' + lista.map(function(c){
+            return '<tr>' + [c.recebidoEm, c.loja, c.nome].map(function(v){ return '<td style="padding:8px 6px;border-bottom:1px solid var(--border);">' + escCv(v) + '</td>'; }).join('') +
+              '<td style="padding:8px 6px;border-bottom:1px solid var(--border);"><span class="badge ' + corSituacao(c.situacao) + '">' + escCv(c.situacao) + '</span></td></tr>';
+          }).join('') + '</tbody></table></div>';
+      })
+      .withFailureHandler(function(){ cvUltimaBusca = ''; })
+      .listarCurriculosDoGestor(email);
+  }
+  $('cv-por').addEventListener('input', function(){ clearTimeout(cvTimer); cvTimer = setTimeout(buscarCurriculos, 800); });
+  $('cv-por').addEventListener('change', function(){ clearTimeout(cvTimer); buscarCurriculos(); });
+
+  // ---------- Flyer de divulgação ----------
+  google.script.run.withSuccessHandler(function(f){
+    if (!f) return;
+    $('flyer-baixar').href = f.baixar; $('flyer-ver').href = f.ver;
+    $('flyer-box').classList.remove('hidden');
+  }).withFailureHandler(function(){}).getFlyer();
+
+  // ---------- Enviar documentos para uma requisição já feita ----------
+  function dMsg(texto, ok){ $('d-msg').className = 'msg ' + (ok ? 'ok' : 'erro'); $('d-msg').textContent = texto; }
+
+  // Busca as requisições do e-mail: sozinha enquanto o gestor digita, ou pelo botão.
+  var ultimaBusca = '', timerBusca = null;
+  function buscarRequisicoes(automatico){
+    var email = $('d-email').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      if (!automatico) dMsg('Informe o e-mail usado na requisição.', false);
+      return;
+    }
+    if (automatico && email === ultimaBusca) return;
+    ultimaBusca = email;
+    var btn = $('d-buscar');
+    btn.disabled = true;
+    dMsg('Buscando suas requisições...', true);
+    google.script.run
+      .withSuccessHandler(function(lista){
+        btn.disabled = false;
+        if (email !== $('d-email').value.trim().toLowerCase()) return; // e-mail mudou enquanto buscava
+        if (!lista.length) {
+          $('d-resto').classList.add('hidden');
+          dMsg('Não encontrei vagas em andamento para este e-mail. Confira se é o mesmo e-mail usado na requisição.', false);
+          return;
+        }
+        $('d-req').innerHTML = (lista.length > 1 ? '<option value="">Selecione</option>' : '') + lista.map(function(r){
+          return '<option value="' + r.id + '">#' + r.id + ' · ' + r.quantidade + 'x ' + r.cargo + ' — ' + r.loja + ' · enviada em ' + r.registradoEm + '</option>';
+        }).join('');
+        $('d-resto').classList.remove('hidden');
+        dMsg('', true);
+      })
+      .withFailureHandler(function(err){ btn.disabled = false; ultimaBusca = ''; dMsg('Erro: ' + (err && err.message), false); })
+      .listarRequisicoesDoGestor(email);
+  }
+  $('d-email').addEventListener('input', function(){
+    clearTimeout(timerBusca);
+    timerBusca = setTimeout(function(){ buscarRequisicoes(true); }, 800);
+  });
+  $('d-email').addEventListener('change', function(){ clearTimeout(timerBusca); buscarRequisicoes(true); });
+  $('d-buscar').addEventListener('click', function(){ clearTimeout(timerBusca); buscarRequisicoes(false); });
+
+  $('d-enviar').addEventListener('click', function(){
+    var id = $('d-req').value;
+    var candidato = $('d-candidato').value.trim();
+    if (!id) { dMsg('Escolha a requisição.', false); return; }
+    if (!candidato) { dMsg('Informe o nome do candidato.', false); return; }
+    var c = conferirDocs($('d-campos'));
+    if (c.erro) { dMsg(c.erro, false); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    dMsg('Enviando... não feche a página.', true);
+    Promise.all(c.files.map(lerArquivo)).then(function(arquivos){
+      google.script.run
+        .withSuccessHandler(function(){
+          btn.disabled = false;
+          $('d-candidato').value = '';
+          Array.prototype.forEach.call($('d-campos').querySelectorAll('.doc-arq'), function(inp){ inp.value = ''; });
+          dMsg('Documentos enviados ✓ O RH já foi avisado. Se tiver outro candidato, pode enviar os documentos dele também.', true);
+        })
+        .withFailureHandler(function(err){ btn.disabled = false; dMsg('Não foi possível enviar: ' + (err && err.message), false); })
+        .enviarDocumentosPeloFormulario(id, $('d-email').value.trim(), candidato, agrupar(c.tipos, arquivos));
+    })['catch'](function(err){ btn.disabled = false; dMsg(err.message, false); });
+  });
+
+  // ---------- Correção de uma requisição devolvida pelo RH (link do e-mail) ----------
+  if (CORRIGIR) {
+    $('modo').classList.add('hidden');
+    ['flyer-box', 'docs-panel', 'cv-panel'].forEach(function(i){ var x = $(i); if (x) x.classList.add('hidden'); });
+    var campoDocs = $('campos-docs'); if (campoDocs && campoDocs.closest('fieldset')) campoDocs.closest('fieldset').classList.add('hidden');
+    $('form-titulo').textContent = 'Corrigir requisição #' + CORRIGIR.id;
+    $('form-sub').textContent = 'O RH devolveu esta requisição para ajuste. Corrija abaixo e envie: é a mesma requisição, não precisa abrir outra.';
+    $('enviar').textContent = 'Enviar correção';
+    $('form').classList.add('hidden');
+    google.script.run
+      .withSuccessHandler(function(r){
+        $('f-gestor').value = r.gestor || ''; $('f-email').value = r.email || ''; $('f-whats').value = r.whatsapp || '';
+        $('f-loja').value = r.loja || ''; $('f-qtd').value = r.quantidade || 1; $('f-substitui').value = r.substitui || '';
+        $('f-req').value = r.requisitos || ''; $('f-obs').value = r.observacoes || '';
+        [['f-cargo', r.cargo], ['f-horario', r.horario]].forEach(function(p){   // valor antigo que não está mais na lista continua selecionável
+          var s = $(p[0]); if (p[1] && Array.prototype.every.call(s.options, function(o){ return o.value !== p[1]; })) { var o = document.createElement('option'); o.textContent = p[1]; s.appendChild(o); }
+          s.value = p[1] || '';
+        });
+        motivo = r.motivo || '';
+        Array.prototype.forEach.call(document.querySelectorAll('#motivo .chip'), function(c){ c.classList.toggle('selected', c.dataset.value === motivo); });
+        $('substitui-wrap').classList.toggle('hidden', !pedeNome());
+        $('corr-aviso').classList.remove('hidden');
+        $('corr-aviso').textContent = 'O que o RH pediu para corrigir: ' + (r.correcao || '(sem observação)');
+        $('form').classList.remove('hidden');
+      })
+      .withFailureHandler(function(err){
+        $('corr-aviso').classList.remove('hidden');
+        $('corr-aviso').textContent = (err && err.message) || 'Não consegui abrir a requisição para correção. Use o link mais recente do e-mail do RH.';
+      })
+      .getParaCorrecao(CORRIGIR.id, CORRIGIR.t);
+  }
+
+  $('nova').addEventListener('click', function(){
+    $('form').reset(); motivo = '';
+    Array.prototype.forEach.call(document.querySelectorAll('#motivo .chip'), function(c){ c.classList.remove('selected'); });
+    $('substitui-wrap').classList.add('hidden'); $('cargo-outro-wrap').classList.add('hidden');
+    $('ok-panel').classList.add('hidden'); $('form-panel').classList.remove('hidden');
+  });
+</script>
+</body>
+</html>
