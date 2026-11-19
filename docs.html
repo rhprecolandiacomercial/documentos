@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Documentos de admissão — Preçolândia</title>
+<meta name="description" content="Envie seus documentos de admissão ao RH da Preçolândia pelo celular.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Preçolândia — Recursos Humanos">
+<meta property="og:title" content="Documentos de admissão">
+<meta property="og:description" content="Envie seus documentos de admissão ao RH da Preçolândia pelo celular.">
+<meta property="og:image" content="https://rhprecolandiacomercial.github.io/documentos/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>body{font-family:Arial,Helvetica,sans-serif;background:#FBFAFC;color:#241A33;text-align:center;padding:48px 20px;}a{color:#4D2885;font-weight:bold;}</style>
+</head>
+<body>
+<p id="m">Abrindo seus documentos...</p>
+<script>
+  // Página de entrada do link de documentos do candidato: leva ao sistema, mantendo o código do link.
+  var APPS = 'https://script.google.com/macros/s/AKfycbwTbfx5XVEFopj5n2-0KxskVMGy95zL5WTWwSQaGKrCdoLCPHWcHufPa8-afcDUwglv/exec';
+  var m = document.getElementById('m');
+  var t = /[?&]t=([0-9a-fA-F-]{36})(?:&|$)/.exec(location.search);
+  if (!t) {
+    m.innerHTML = 'Link incompleto. Peça um novo link ao RH da Preçolândia.';
+  } else {
+    var destino = APPS + '?view=docs&t=' + t[1];
+    location.replace(destino);
+    setTimeout(function(){ m.innerHTML = 'Se a página não abrir, <a href="' + destino + '">toque aqui</a>.'; }, 6000);
+  }
+</script>
+</body>
+</html>
